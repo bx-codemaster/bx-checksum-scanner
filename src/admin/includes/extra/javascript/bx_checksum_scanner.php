@@ -108,8 +108,13 @@ document.addEventListener('DOMContentLoaded', function () {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params
     }).then(function (r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
+      return r.json().then(function (data) {
+        if (!r.ok) throw new Error(data.error || 'HTTP ' + r.status);
+        return data;
+      }).catch(function (e) {
+        if (e.message && e.message !== 'HTTP ' + r.status) throw e;
+        throw new Error('HTTP ' + r.status);
+      });
     });
   }
 
@@ -121,8 +126,13 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
     return fetch(ajaxUrl + '?' + params).then(function (r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
+      return r.json().then(function (data) {
+        if (!r.ok) throw new Error(data.error || 'HTTP ' + r.status);
+        return data;
+      }).catch(function (e) {
+        if (e.message && e.message !== 'HTTP ' + r.status) throw e;
+        throw new Error('HTTP ' + r.status);
+      });
     });
   }
 

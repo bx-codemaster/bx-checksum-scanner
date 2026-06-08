@@ -31,11 +31,44 @@
  *   bx_cs_json()          - JSON-Ausgabe, beendet Script
  *   bx_cs_unlink()        - Sicheres Löschen (prüft is_file + is_writable)
  *   bx_cs_collect_files() - Rekursive Dateisammlung via DirectoryIterator
+ *
+ * Fehlerbehandlung:
+ *   register_shutdown_function - wandelt PHP Fatal Errors in JSON um
+ *   set_exception_handler      - wandelt uncaught Exceptions in JSON um
  * --------------------------------------------------------------
  */
 
 ob_start();
 require('includes/application_top.php');
+
+// ---------------------------------------------------------------
+// Globaler Fehler-Handler – wandelt jeden Fatal Error / Exception
+// in eine saubere JSON-Antwort um (verhindert leere Antworten bei
+// display_errors = Off auf Produktivservern)
+// ---------------------------------------------------------------
+register_shutdown_function(function () {
+    $err = error_get_last();
+    if ($err !== null && in_array($err['type'], array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR), true)) {
+        while (ob_get_level()) ob_end_clean();
+        http_response_code(500);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(array(
+            'success' => false,
+            'error'   => 'PHP Fatal Error: ' . $err['message'] . ' in ' . $err['file'] . ':' . $err['line'],
+        ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+});
+
+set_exception_handler(function (Throwable $e) {
+    while (ob_get_level()) ob_end_clean();
+    http_response_code(500);
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode(array(
+        'success' => false,
+        'error'   => get_class($e) . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(),
+    ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+});
 
 // ---------------------------------------------------------------
 // Sprachkonstanten – Fallback falls Sprachdatei nicht geladen wurde
@@ -87,7 +120,8 @@ function bx_cs_collect_files(string $dir, array &$files): void {
 
     $iterator = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
-        RecursiveIteratorIterator::SELF_FIRST
+        RecursiveIteratorIterator::SELF_FIRST,
+        RecursiveIteratorIterator::CATCH_GET_CHILD  // nicht lesbare Verzeichnisse überspringen
     );
 
     foreach ($iterator as $file) {
@@ -122,16 +156,20 @@ switch ($action) {
     // ----------------------------------------------------------
     case 'scan_init':
         // Garbage Collection: verwaiste Temp-Dateien älter als 2 Stunden löschen
-        $tmp_dir = sys_get_temp_dir();
+        $tmp_dir = defined('SQL_CACHEDIR') ? SQL_CACHEDIR : sys_get_temp_dir();
         $gc_ttl  = 7200; // 2 Stunden in Sekunden
-        if (is_dir($tmp_dir)) {
-            foreach (new DirectoryIterator($tmp_dir) as $gc_file) {
-                if (!$gc_file->isFile()) continue;
-                $gc_name = $gc_file->getFilename();
-                if (strncmp($gc_name, 'bx_cs_scan_', 11) !== 0 || substr($gc_name, -5) !== '.json') continue;
-                if ((time() - $gc_file->getMTime()) > $gc_ttl) {
-                    bx_cs_unlink($gc_file->getPathname());
+        if (is_dir($tmp_dir) && is_readable($tmp_dir)) {
+            try {
+                foreach (new DirectoryIterator($tmp_dir) as $gc_file) {
+                    if (!$gc_file->isFile()) continue;
+                    $gc_name = $gc_file->getFilename();
+                    if (strncmp($gc_name, 'bx_cs_scan_', 11) !== 0 || substr($gc_name, -5) !== '.json') continue;
+                    if ((time() - $gc_file->getMTime()) > $gc_ttl) {
+                        bx_cs_unlink($gc_file->getPathname());
+                    }
                 }
+            } catch (Exception $e) {
+                // GC nicht möglich (fehlende Rechte) – scan_init trotzdem fortsetzen
             }
         }
 
@@ -140,10 +178,14 @@ switch ($action) {
         }
 
         $files = array();
-        bx_cs_collect_files(DIR_FS_DOCUMENT_ROOT, $files);
+        try {
+            bx_cs_collect_files(DIR_FS_DOCUMENT_ROOT, $files);
+        } catch (Exception $e) {
+            bx_cs_json(array('success' => false, 'error' => 'collect_files: ' . $e->getMessage()));
+        }
         $total = count($files);
 
-        $tmp_file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'bx_cs_scan_' . session_id() . '.json';
+        $tmp_file = (defined('SQL_CACHEDIR') ? SQL_CACHEDIR : sys_get_temp_dir() . DIRECTORY_SEPARATOR) . 'bx_cs_scan_' . session_id() . '.json';
         if (file_put_contents($tmp_file, json_encode($files)) === false) {
             bx_cs_json(array('success' => false, 'error' => BX_CHECKSUM_SCANNER_AJAX_ERR_TMP_WRITE));
         }
@@ -243,7 +285,11 @@ switch ($action) {
 
         // Einmaliger Scan – erkennt neue Dateien
         $all_files = array();
-        bx_cs_collect_files(DIR_FS_DOCUMENT_ROOT, $all_files);
+        try {
+            bx_cs_collect_files(DIR_FS_DOCUMENT_ROOT, $all_files);
+        } catch (Exception $e) {
+            bx_cs_json(array('success' => false, 'error' => 'collect_files: ' . $e->getMessage()));
+        }
 
         $new_files = array();
         foreach ($all_files as $path) {
