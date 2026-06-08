@@ -5,7 +5,6 @@
 **Version:** v3.0.0  
 **Stand:** 08.06.2026  
 **Lizenz:** GNU General Public License v2  
-**Kompatibilität:** modified eCommerce 3.0.1, 3.0.2, 3.1.0 · PHP ^7.4 || ^8.0
 
 ---
 
