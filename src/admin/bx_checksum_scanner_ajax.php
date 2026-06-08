@@ -19,12 +19,18 @@
  * www.bx-coding.de
  * 2026-06-08
  *
- * Aktionen (POST, JSON-Antwort):
- *   scan_init    - Tabelle leeren, alle Dateipfade sammeln
- *   scan_chunk   - Chunk hashen + Batch-INSERT in DB
- *   check_init   - DB-Einträge laden + neue Dateien ermitteln
- *   check_chunk  - Chunk prüfen + Bulk-UPDATE in DB
- *   results      - Ergebnisse paginiert zurückgeben
+ * Aktionen (JSON-Antwort):
+ *   POST  scan_init    - Tabelle leeren, Dateiliste in Temp-Datei schreiben,
+ *                        GC verwaister Temp-Dateien (älter als 2 h)
+ *   POST  scan_chunk   - Chunk hashen + Batch-INSERT in DB
+ *   POST  check_init   - DB-Einträge laden, neue Dateien ermitteln
+ *   POST  check_chunk  - Chunk prüfen + Bulk-UPDATE in DB
+ *   GET   results      - Ergebnisse paginiert zurückgeben (nur lesend)
+ *
+ * Hilfsfunktionen:
+ *   bx_cs_json()          - JSON-Ausgabe, beendet Script
+ *   bx_cs_unlink()        - Sicheres Löschen (prüft is_file + is_writable)
+ *   bx_cs_collect_files() - Rekursive Dateisammlung via DirectoryIterator
  * --------------------------------------------------------------
  */
 
@@ -48,6 +54,12 @@ defined('BX_CHECKSUM_SCANNER_AJAX_ERR_UNKNOWN')     or define('BX_CHECKSUM_SCANN
 // ---------------------------------------------------------------
 // JSON-Helper – leert Output-Buffer, setzt Header, gibt aus, beendet
 // ---------------------------------------------------------------
+
+function bx_cs_unlink(string $path): void {
+    if (is_file($path) && is_writable($path)) {
+        unlink($path);
+    }
+}
 
 function bx_cs_json(array $data, int $status = 200): void {
     session_write_close();
@@ -94,8 +106,14 @@ function bx_cs_collect_files(string $dir, array &$files): void {
 // Action-Dispatch
 // ---------------------------------------------------------------
 
-$action = isset($_POST['action']) ? (string)$_POST['action']
-        : (isset($_GET['action']) ? (string)$_GET['action'] : '');
+// 'results' ist eine lesende Aktion – nur via GET erlaubt.
+// Schreibende Aktionen (scan_init, scan_chunk, check_init, check_chunk) nur via POST.
+$action = '';
+if (isset($_GET['action']) && (string)$_GET['action'] === 'results') {
+    $action = 'results';
+} elseif (isset($_POST['action'])) {
+    $action = (string)$_POST['action'];
+}
 
 switch ($action) {
     // ----------------------------------------------------------
@@ -103,6 +121,20 @@ switch ($action) {
     // (nicht in Session – MySQL max_allowed_packet wäre überschritten)
     // ----------------------------------------------------------
     case 'scan_init':
+        // Garbage Collection: verwaiste Temp-Dateien älter als 2 Stunden löschen
+        $tmp_dir = sys_get_temp_dir();
+        $gc_ttl  = 7200; // 2 Stunden in Sekunden
+        if (is_dir($tmp_dir)) {
+            foreach (new DirectoryIterator($tmp_dir) as $gc_file) {
+                if (!$gc_file->isFile()) continue;
+                $gc_name = $gc_file->getFilename();
+                if (strncmp($gc_name, 'bx_cs_scan_', 11) !== 0 || substr($gc_name, -5) !== '.json') continue;
+                if ((time() - $gc_file->getMTime()) > $gc_ttl) {
+                    bx_cs_unlink($gc_file->getPathname());
+                }
+            }
+        }
+
         if (!xtc_db_query('TRUNCATE TABLE bx_checksum_scanner')) {
             bx_cs_json(array('success' => false, 'error' => BX_CHECKSUM_SCANNER_AJAX_ERR_DB_RESET));
         }
@@ -151,7 +183,7 @@ switch ($action) {
 
         if (empty($chunk)) {
             unset($_SESSION['bx_checksum_scan']);
-            @unlink($tmp_file);
+            bx_cs_unlink($tmp_file);
             bx_cs_json(array('success' => true, 'done' => $total, 'total' => $total, 'complete' => true));
         }
 
@@ -181,7 +213,7 @@ switch ($action) {
         $_SESSION['bx_checksum_scan']['done'] = $done;
         if ($complete) {
             unset($_SESSION['bx_checksum_scan']);
-            @unlink($tmp_file);
+            bx_cs_unlink($tmp_file);
         }
 
         bx_cs_json(array(

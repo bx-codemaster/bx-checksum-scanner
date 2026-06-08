@@ -1,4 +1,24 @@
 <?php
+/** -----------------------------------------------------------------------------------------
+ * $Id: admin/includes/extra/javascript/bx_checksum_scanner.php 2026-06-08 benax $
+ * modified eCommerce Shopsoftware
+ * http://www.modified-shop.org
+ *
+ * Copyright (c) 2009 - 2013 [www.modified-shop.org]
+ * -----------------------------------------------------------------------------------------
+ * Released under the GNU General Public License
+ * -----------------------------------------------------------------------------------------
+ * BX Checksum Scanner – Frontend-JavaScript (Admin UI)
+ * Copyright (c) 2026 Axel Benkert (benax)
+ * www.bx-coding.de
+ * 2026-06-08
+ *
+ * Gibt das JavaScript für die Admin-Seite bx_checksum_scanner.php aus.
+ * Steuert die chunked AJAX-Verarbeitung (Scan / Prüfung), Fortschrittsanzeige,
+ * Ergebnis-Tabelle und Seitennummerierung. Alle Anzeigetexte werden über
+ * PHP-Sprachkonstanten in das JS-Objekt `lang` injiziert.
+ * -----------------------------------------------------------------------------------------
+ */
   defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 
   if (defined('MODULE_BX_CHECKSUM_SCANNER_STATUS') && 'True' == MODULE_BX_CHECKSUM_SCANNER_STATUS && basename($_SERVER['PHP_SELF']) == 'bx_checksum_scanner.php') {
@@ -13,21 +33,36 @@ document.addEventListener('DOMContentLoaded', function () {
   var csrfName   = '<?php echo isset($_SESSION['CSRFName'])  ? $_SESSION['CSRFName']  : ''; ?>';
   var csrfToken  = '<?php echo isset($_SESSION['CSRFToken']) ? $_SESSION['CSRFToken'] : ''; ?>';
   var lang = <?php echo json_encode(array(
-    'status_delete' => BX_CHECKSUM_SCANNER_STATUS_DELETE,
-    'status_change' => BX_CHECKSUM_SCANNER_STATUS_CHANGE,
-    'status_new'    => BX_CHECKSUM_SCANNER_STATUS_NEW,
-    'status_ok'     => BX_CHECKSUM_SCANNER_STATUS_OK,
-    'th_status'     => BX_CHECKSUM_SCANNER_TH_STATUS,
-    'th_file'       => BX_CHECKSUM_SCANNER_TH_FILE,
-    'th_size'       => BX_CHECKSUM_SCANNER_TH_SIZE,
-    'th_lastsize'   => BX_CHECKSUM_SCANNER_TH_LASTSIZE,
-    'th_filedate'   => BX_CHECKSUM_SCANNER_TH_FILEDATE,
-    'th_dateadded'  => BX_CHECKSUM_SCANNER_TH_DATEADDED,
-    'th_lastcheck'  => BX_CHECKSUM_SCANNER_TH_LASTCHECK,
-    'no_new_files'  => BX_CHECKSUM_SCANNER_NONEWFILES,
-    'first_start'   => BX_CHECKSUM_SCANNER_FIRST_START,
-    'reset_ok'      => BX_CHECKSUM_SCANNER_RESET,
-    'first_reset'   => BX_CHECKSUM_SCANNER_FIRST_RESET,
+    'status_delete'      => BX_CHECKSUM_SCANNER_STATUS_DELETE,
+    'status_change'      => BX_CHECKSUM_SCANNER_STATUS_CHANGE,
+    'status_new'         => BX_CHECKSUM_SCANNER_STATUS_NEW,
+    'status_ok'          => BX_CHECKSUM_SCANNER_STATUS_OK,
+    'th_status'          => BX_CHECKSUM_SCANNER_TH_STATUS,
+    'th_file'            => BX_CHECKSUM_SCANNER_TH_FILE,
+    'th_size'            => BX_CHECKSUM_SCANNER_TH_SIZE,
+    'th_lastsize'        => BX_CHECKSUM_SCANNER_TH_LASTSIZE,
+    'th_filedate'        => BX_CHECKSUM_SCANNER_TH_FILEDATE,
+    'th_dateadded'       => BX_CHECKSUM_SCANNER_TH_DATEADDED,
+    'th_lastcheck'       => BX_CHECKSUM_SCANNER_TH_LASTCHECK,
+    'no_new_files'       => BX_CHECKSUM_SCANNER_NONEWFILES,
+    'first_start'        => BX_CHECKSUM_SCANNER_FIRST_START,
+    'reset_ok'           => BX_CHECKSUM_SCANNER_RESET,
+    'first_reset'        => BX_CHECKSUM_SCANNER_FIRST_RESET,
+    'progress_init'      => BX_CHECKSUM_SCANNER_PROGRESS_INIT,
+    'progress_checksums' => BX_CHECKSUM_SCANNER_PROGRESS_CHECKSUMS,
+    'progress_check'     => BX_CHECKSUM_SCANNER_PROGRESS_CHECK,
+    'progress_loading'   => BX_CHECKSUM_SCANNER_PROGRESS_LOADING,
+    'err_scan_chunk'     => BX_CHECKSUM_SCANNER_ERR_SCAN_CHUNK,
+    'err_scan_init'      => BX_CHECKSUM_SCANNER_ERR_SCAN_INIT,
+    'err_check_chunk'    => BX_CHECKSUM_SCANNER_ERR_CHECK_CHUNK,
+    'err_check_init'     => BX_CHECKSUM_SCANNER_ERR_CHECK_INIT,
+    'err_results'        => BX_CHECKSUM_SCANNER_ERR_RESULTS,
+    'paging_shown'       => BX_CHECKSUM_SCANNER_PAGING_SHOWN,
+    'paging_to'          => BX_CHECKSUM_SCANNER_PAGING_TO,
+    'paging_total'       => BX_CHECKSUM_SCANNER_PAGING_TOTAL,
+    'paging_entries'     => BX_CHECKSUM_SCANNER_PAGING_ENTRIES,
+    'paging_page'        => BX_CHECKSUM_SCANNER_PAGING_PAGE,
+    'paging_of'          => BX_CHECKSUM_SCANNER_PAGING_OF,
   ), JSON_UNESCAPED_UNICODE); ?>;
 
   var pendingNewFiles = [];
@@ -95,8 +130,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function runScanChunk(done, total) {
     return postAction('scan_chunk', { offset: done }).then(function (d) {
-      if (!d.success) throw new Error(d.error || 'scan_chunk fehlgeschlagen');
-      setProgress(d.done, d.total, 'Prüfsummen erstellen');
+      if (!d.success) throw new Error(d.error || lang.err_scan_chunk);
+      setProgress(d.done, d.total, lang.progress_checksums);
       if (d.complete) return;
       return runScanChunk(d.done, d.total);
     });
@@ -106,11 +141,11 @@ document.addEventListener('DOMContentLoaded', function () {
     setButtons(true);
     setResult('');
     pendingNewFiles = [];
-    setProgress(0, 1, 'Initialisiere ...');
+    setProgress(0, 1, lang.progress_init);
     postAction('scan_init')
       .then(function (d) {
-        if (!d.success) throw new Error(d.error || 'scan_init fehlgeschlagen');
-        setProgress(0, d.total, 'Prüfsummen erstellen');
+        if (!d.success) throw new Error(d.error || lang.err_scan_init);
+        setProgress(0, d.total, lang.progress_checksums);
         return runScanChunk(0, d.total);
       })
       .then(function () {
@@ -129,8 +164,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function runCheckChunk(done, total) {
     return postAction('check_chunk', { offset: done }).then(function (d) {
-      if (!d.success) throw new Error(d.error || 'check_chunk fehlgeschlagen');
-      setProgress(d.done, d.total, 'Dateien prüfen');
+      if (!d.success) throw new Error(d.error || lang.err_check_chunk);
+      setProgress(d.done, d.total, lang.progress_check);
       if (d.complete) return;
       return runCheckChunk(d.done, d.total);
     });
@@ -140,10 +175,10 @@ document.addEventListener('DOMContentLoaded', function () {
     setButtons(true);
     setResult('');
     pendingNewFiles = [];
-    setProgress(0, 1, 'Initialisiere ...');
+    setProgress(0, 1, lang.progress_init);
     postAction('check_init')
       .then(function (d) {
-        if (!d.success) throw new Error(d.error || 'check_init fehlgeschlagen');
+        if (!d.success) throw new Error(d.error || lang.err_check_init);
         if (d.total === 0) {
           hideProgress();
           setResult('<p>' + lang.first_start + '</p>');
@@ -151,9 +186,9 @@ document.addEventListener('DOMContentLoaded', function () {
           return Promise.resolve(null);
         }
         pendingNewFiles = d.new_files || [];
-        setProgress(0, d.total, 'Dateien prüfen');
+        setProgress(0, d.total, lang.progress_check);
         return runCheckChunk(0, d.total).then(function () {
-          setProgress(d.total, d.total, 'Lade Ergebnisse ...');
+          setProgress(d.total, d.total, lang.progress_loading);
           return bxCsLoadResults(1);
         });
       })
@@ -172,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function bxCsLoadResults(page) {
     return getAction('results', { page: page, per_page: 50 }).then(function (d) {
-      if (!d.success) throw new Error(d.error || 'Fehler beim Laden der Ergebnisse');
+      if (!d.success) throw new Error(d.error || lang.err_results);
       renderTable(d);
     });
   }
@@ -270,18 +305,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
       h += '<div class="clear"></div>';
       h += '<div class="smallText pdg2 flt-l">';
-      h += '<span style="line-height:28px;">Angezeigt werden <b>' + from + '</b> bis <b>' + to + '</b>';
-      h += ' (von insgesamt <b>' + data.total + '</b> Eintr&auml;gen)</span>';
+      h += '<span style="line-height:28px;">' + lang.paging_shown + ' <b>' + from + '</b> ' + lang.paging_to + ' <b>' + to + '</b>';
+      h += ' (' + lang.paging_total + ' <b>' + data.total + '</b> ' + lang.paging_entries + ')</span>';
       h += '</div>';
 
       if (pages > 1) {
         h += '<div class="smallText pdg2 flt-r">';
-        h += 'Seite <select onchange="bxCsPage(this.value)" style="margin:0 4px;">';
+        h += lang.paging_page + ' <select onchange="bxCsPage(this.value)" style="margin:0 4px;">';
         for (var i = 1; i <= pages; i++) {
           h += '<option value="' + i + '"' + (i === cur ? ' selected="selected"' : '') + '>' + i + '</option>';
         }
         h += '</select>';
-        h += ' von ' + pages + '&nbsp;&nbsp;';
+        h += ' ' + lang.paging_of + ' ' + pages + '&nbsp;&nbsp;';
         if (cur < pages) {
           h += '<a href="javascript:bxCsPage(' + (cur + 1) + ')" class="button">&raquo;</a>';
         }

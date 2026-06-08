@@ -1,14 +1,22 @@
 <?php
-/* -----------------------------------------------------------------------------------------
-   $Id$
-
-   modified eCommerce Shopsoftware
-   http://www.modified-shop.org
-
-   Copyright (c) 2009 - 2013 [www.modified-shop.org]
-   -----------------------------------------------------------------------------------------
-   Released under the GNU General Public License
-   ---------------------------------------------------------------------------------------*/
+/** -----------------------------------------------------------------------------------------
+ * $Id: admin/includes/modules/system/bx_checksum_scanner.php 2026-06-08 benax $
+ * modified eCommerce Shopsoftware
+ * http://www.modified-shop.org
+ *
+ * Copyright (c) 2009 - 2013 [www.modified-shop.org]
+ * -----------------------------------------------------------------------------------------
+ * Released under the GNU General Public License
+ * -----------------------------------------------------------------------------------------
+ * BX Checksum Scanner – System-Modul-Klasse
+ * Copyright (c) 2026 Axel Benkert (benax)
+ * www.bx-coding.de
+ * 2026-06-08
+ *
+ * Registriert das Modul im modified-Systemmodul-Framework und stellt
+ * Install- / Remove-Methoden sowie Konfigurationsparameter bereit.
+ * -----------------------------------------------------------------------------------------
+ */
 
 defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.' );
 
@@ -21,13 +29,18 @@ class bx_checksum_scanner {
   public int $sort_order;
   public bool $enabled;
   private bool $_check;
+  public string $development_status; // 'p' = production ready, 'd' = in development
+  public bool $is_hot;               // Kennzeichnung als "Hot Module" für besondere Hervorhebung in der Admin-Oberfläche
 
   public function __construct() {
      $this->code        = 'bx_checksum_scanner';
-     $this->title       = MODULE_BX_CHECKSUM_SCANNER_TEXT_TITLE;
-     $this->description = MODULE_BX_CHECKSUM_SCANNER_TEXT_DESC;
+     $this->version     = '3.0.0';
+     $this->title       = MODULE_BX_CHECKSUM_SCANNER_TITLE;
+     $this->description = MODULE_BX_CHECKSUM_SCANNER_DESC;
      $this->sort_order  = defined('MODULE_BX_CHECKSUM_SCANNER_SORT_ORDER') ? MODULE_BX_CHECKSUM_SCANNER_SORT_ORDER : 0;
      $this->enabled     = ((defined('MODULE_BX_CHECKSUM_SCANNER_STATUS') && MODULE_BX_CHECKSUM_SCANNER_STATUS == 'True') ? true : false);
+     $this->development_status = 'p';
+     $this->is_hot      = false; // Kennzeichnung als "Hot Module" für besondere Hervorhebung in der Admin-Oberfläche
   }
 
   public function process($file): void {
@@ -74,11 +87,12 @@ class bx_checksum_scanner {
   public function remove(): void {
     xtc_db_query("DELETE FROM " . TABLE_CONFIGURATION . " WHERE configuration_key in ('" . implode("', '", $this->keys()) . "')");
     xtc_db_query("DROP TABLE IF EXISTS bx_checksum_scanner");
-    xtc_db_query("DROP TABLE IF EXISTS bx_checksum_scanner_all");		// falls die Tabelle von Vorgängerversionen noch existiert
-    xtc_db_query("DROP TABLE IF EXISTS bx_checksum_scanner_html");		// falls die Tabelle von Vorgängerversionen noch existiert
-    xtc_db_query("DROP TABLE IF EXISTS bx_checksum_scanner_js");		  // falls die Tabelle von Vorgängerversionen noch existiert
-    xtc_db_query("DROP TABLE IF EXISTS bx_checksum_scanner_php");		// falls die Tabelle von Vorgängerversionen noch existiert
-    xtc_db_query("DROP TABLE IF EXISTS bx_checksum_scanner_css");		// falls die Tabelle von Vorgängerversionen noch existiert
+    xtc_db_query("DROP TABLE IF EXISTS checksum_scanner");		    // falls die Tabelle von Vorgängerversionen noch existiert
+    xtc_db_query("DROP TABLE IF EXISTS checksum_scanner_all");		// falls die Tabelle von Vorgängerversionen noch existiert
+    xtc_db_query("DROP TABLE IF EXISTS checksum_scanner_html");	// falls die Tabelle von Vorgängerversionen noch existiert
+    xtc_db_query("DROP TABLE IF EXISTS checksum_scanner_js");		// falls die Tabelle von Vorgängerversionen noch existiert
+    xtc_db_query("DROP TABLE IF EXISTS checksum_scanner_php");		// falls die Tabelle von Vorgängerversionen noch existiert
+    xtc_db_query("DROP TABLE IF EXISTS checksum_scanner_css");		// falls die Tabelle von Vorgängerversionen noch existiert
     xtc_db_query("ALTER TABLE " . TABLE_ADMIN_ACCESS . " DROP bx_checksum_scanner");
     xtc_db_query("ALTER TABLE " . TABLE_ADMIN_ACCESS . " DROP bx_checksum_scanner_ajax");
   }
@@ -96,7 +110,7 @@ class bx_checksum_scanner {
 			// Moduldateien dürfen erst entfernt werden, nachdem das Modul logisch
 			// aus dem System abgemeldet wurde.
 			if ($this->check()) {
-				$messageStack->add_session(MODULE_BX_CHECKSUM_SCANNER_TEXT_UNINSTALL_FIRST, 'error');
+				$messageStack->add_session(MODULE_BX_CHECKSUM_SCANNER_UNINSTALL_FIRST, 'error');
 				return;
 			}
 

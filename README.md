@@ -52,12 +52,12 @@ Um den aktuellen Dateizustand gegen die gespeicherte Referenz zu vergleichen:
 
 ### 4. Ergebnis auswerten
 
-| Farbe | Symbol | Bedeutung |
-|---|---|---|
-| 🟢 Grün | ✓ | Datei unverändert (OK) |
-| 🟣 Lila | ✎ | Datei wurde geändert |
-| 🔴 Rot | ✗ | Datei wurde gelöscht |
-| 🔴 Rot | + | Neue Datei (nicht in Referenz) |
+| Farbe    | Symbol | Bedeutung                 |
+|----------|--------|---------------------------|
+| 🟢 Grün  | ✓ | Datei unverändert (OK)         |
+| 🟣 Lila  | ✎ | Datei wurde geändert           |
+| 🔴 Rot   | ✗ | Datei wurde gelöscht           |
+| 🔴 Rot   | + | Neue Datei (nicht in Referenz)  |
 
 Geänderte Dateien sollten geprüft werden – bei legitimen Änderungen (z. B. nach einem Update) einfach eine neue Referenz aufbauen.
 
@@ -80,12 +80,13 @@ Das ursprüngliche Modul (`checksum_scanner` von Self-Commerce / xtc-load.de, St
 
 ### Technische Überarbeitung
 
-- **Chunked AJAX-Processing** statt synchronem PHP-Request-Ablauf: Scan und Prüfung laufen in konfigurierbaren Chunks (200 Dateien je Request), um PHP-Timeouts bei großen Shops zu vermeiden
-- **Fortschrittsbalken** während Scan und Prüfung
-- **Batch-INSERT** via mehrzeiligem SQL (statt einzelner INSERTs pro Datei) → erheblich schneller
-- **Bulk-UPDATE** mit `CASE WHEN`-Konstrukt → ein einzelner SQL-Request pro Status-Gruppe statt N einzelner UPDATEs
-- **Temp-Datei statt Session** für die Dateiliste beim Scan (vermeidet `max_allowed_packet`-Probleme bei großen Shops)
-- **Paginierte Ergebnisanzeige** im modified-Stil (Dropdown-Navigation, Eintragsanzeige)
+- Chunked AJAX-Verarbeitung (200 Dateien je Request) statt Single-Request mit PHP-Timeout-Risiko
+- Temp-Datei statt Session für die Dateiliste (verhindert `max_allowed_packet`-Überschreitung)
+- **Garbage Collection:** `scan_init` löscht automatisch verwaiste Temp-Dateien älter als 2 Stunden (z. B. bei Browser-Abbruch während eines laufenden Scans)
+- **GET/POST-Trennung:** Lesende Aktion `results` nur via GET erreichbar; schreibende Aktionen (`scan_init`, `scan_chunk`, `check_init`, `check_chunk`) ausschließlich via POST – verhindert CSRF-Angriffe über einfache GET-Links
+- **`bx_cs_unlink()`-Helper:** Sicheres Löschen von Temp-Dateien mit expliziter `is_file()`/`is_writable()`-Prüfung, kein Error-Suppressor (`@`) im Code
+- Bulk-UPDATE mit `CASE WHEN` statt N einzelner SQL-Statements je Chunk
+- `DirectoryIterator` statt `glob()` für die GC (funktioniert auch bei deaktiviertem `glob` via `disable_functions`)
 
 ### UI-Verbesserungen
 
@@ -99,10 +100,11 @@ Das ursprüngliche Modul (`checksum_scanner` von Self-Commerce / xtc-load.de, St
 
 ### Mehrsprachigkeit
 
-- Alle angezeigten Texte (inkl. AJAX-Fehlermeldungen) als Sprachkonstanten (`BX_CHECKSUM_SCANNER_*`)
-- Sprachdateien für **Deutsch** und **Englisch** (je `extra/admin/` und `modules/system/`)
+- Alle angezeigten Texte (inkl. AJAX-Fehlermeldungen, Fortschrittslabels, Pagination) als Sprachkonstanten (`BX_CHECKSUM_SCANNER_*`)
+- Sprachdateien für **Deutsch**, **Englisch** und **Spanisch** (je `extra/admin/` und `modules/system/`)
 - Alle Konstanten mit `defined() or define()` abgesichert gegen doppeltes Laden
 - AJAX-Fehlermeldungen als Fallback-Konstanten direkt in der AJAX-Datei
+- JavaScript-Anzeigetexte über PHP-Sprachkonstanten in das JS-Objekt `lang` injiziert (keine hardcodierten Strings im JS)
 
 ### Sicherheit
 
@@ -139,9 +141,12 @@ src/
     ├── german/
     │   ├── extra/admin/bx_checksum_scanner.php     # DE UI-Texte
     │   └── modules/system/bx_checksum_scanner.php  # DE Modul-Texte
-    └── english/
-        ├── extra/admin/bx_checksum_scanner.php     # EN UI-Texte
-        └── modules/system/bx_checksum_scanner.php  # EN Modul-Texte
+    ├── english/
+    │   ├── extra/admin/bx_checksum_scanner.php     # EN UI-Texte
+    │   └── modules/system/bx_checksum_scanner.php  # EN Modul-Texte
+    └── spanish/
+        ├── extra/admin/bx_checksum_scanner.php     # ES UI-Texte
+        └── modules/system/bx_checksum_scanner.php  # ES Modul-Texte
 ```
 
 ---

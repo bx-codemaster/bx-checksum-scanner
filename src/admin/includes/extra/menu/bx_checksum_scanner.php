@@ -1,8 +1,22 @@
 <?php
-# MUSTER für DATEI in admin/includes/extra_menu - Dateiname 01_example.php
-# Damit ist es moeglich das Adminmenue mit weiteren Eintraegen beliebig zu ergaenzen
-# Die neuen Menueeintaege werden unten an die bestehenden Eintraege hinzugefuegt
-# Die Reihenfolge der neuen Einträge kann mit einer vorangestellten Nummer im Dateinamen gesteuert werden
+/** -----------------------------------------------------------------------------------------
+ * $Id: admin/includes/extra/menu/bx_checksum_scanner.php 2026-06-08 benax $
+ * modified eCommerce Shopsoftware
+ * http://www.modified-shop.org
+ *
+ * Copyright (c) 2009 - 2013 [www.modified-shop.org]
+ * -----------------------------------------------------------------------------------------
+ * Released under the GNU General Public License
+ * -----------------------------------------------------------------------------------------
+ * BX Checksum Scanner – Admin-Menüeintrag
+ * Copyright (c) 2026 Axel Benkert (benax)
+ * www.bx-coding.de
+ * 2026-06-08
+ *
+ * Fügt den Menüeintrag „BX Checksum Scanner" in die Tools-Box des
+ * Admin-Menüs ein. Der Anzeigetext ist sprachabhängig (de / fallback).
+ * -----------------------------------------------------------------------------------------
+ */
 
 defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.' );
 

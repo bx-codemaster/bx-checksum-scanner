@@ -1,4 +1,22 @@
-<?php 
+<?php
+/** -----------------------------------------------------------------------------------------
+ * $Id: admin/includes/extra/css/bx_checksum_scanner.php 2026-06-08 benax $
+ * modified eCommerce Shopsoftware
+ * http://www.modified-shop.org
+ *
+ * Copyright (c) 2009 - 2013 [www.modified-shop.org]
+ * -----------------------------------------------------------------------------------------
+ * Released under the GNU General Public License
+ * -----------------------------------------------------------------------------------------
+ * BX Checksum Scanner – Admin-Styles
+ * Copyright (c) 2026 Axel Benkert (benax)
+ * www.bx-coding.de
+ * 2026-06-08
+ *
+ * Gibt die CSS-Stile für die Admin-Seite bx_checksum_scanner.php aus
+ * (Layout, Fortschrittsbalken, Tabelle, Statusfarben).
+ * -----------------------------------------------------------------------------------------
+ */
   defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 
   if (basename($_SERVER['PHP_SELF']) == 'bx_checksum_scanner.php') {
