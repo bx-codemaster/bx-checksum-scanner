@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "scopes": {
+        "shop-root": {
+            "hashes": {
+                "/admin/bx_checksum_scanner.php": "b663c15923dfb33f50b5bc9d177b65f3",
+                "/admin/bx_checksum_scanner_ajax.php": "01c90a28cc7dcd1a5ba4f29b00fa3a3e",
+                "/admin/images/icons/bx_checksum_scanner/icon_css.png": "924979d5f7f52a4510c3fe461f2a043a",
+                "/admin/images/icons/bx_checksum_scanner/icon_delete.png": "9b16c7f91e9cc0adf1273fde7bcfc525",
+                "/admin/images/icons/bx_checksum_scanner/icon_edit.png": "c1174a9d59038a943944c2f2fe20bc6d",
+                "/admin/images/icons/bx_checksum_scanner/icon_html.png": "5bce653bfb32cd3db2cb43570fed97a4",
+                "/admin/images/icons/bx_checksum_scanner/icon_javascript.png": "be4ecb69ff66cb237878654503804282",
+                "/admin/images/icons/bx_checksum_scanner/icon_new.png": "d2adbae9986f151e999218c37e048c18",
+                "/admin/images/icons/bx_checksum_scanner/icon_ok.png": "30f047fe89ee086a286b33202068469d",
+                "/admin/images/icons/bx_checksum_scanner/icon_php.png": "1940931af98bb2a9a0433fc26c956e80",
+                "/admin/images/icons/heading/bx_checksum_scanner.png": "9dbf1f24760971532d346f6534fc0498",
+                "/admin/includes/extra/css/bx_checksum_scanner.php": "c89e2e595325eb32adf142ab53e3f3de",
+                "/admin/includes/extra/filenames/bx_checksum_scanner.php": "db040917e4b30c9d1a19edda0c6b6570",
+                "/admin/includes/extra/javascript/bx_checksum_scanner.php": "7f4c933fdb64b68efce61e78620c84f6",
+                "/admin/includes/extra/menu/bx_checksum_scanner.php": "26638618ed3cd1257bcd5cfbbe71bfba",
+                "/admin/includes/modules/system/bx_checksum_scanner.php": "405904a15a99663b3e6191fad6e443af",
+                "/lang/english/extra/admin/bx_checksum_scanner.php": "7678e91f18e15b134723451794299e22",
+                "/lang/english/modules/system/bx_checksum_scanner.php": "4e4e3db70832d8721629caa9a8a7b165",
+                "/lang/german/extra/admin/bx_checksum_scanner.php": "d68cff3ba2138c7fae23b355b9c49b6e",
+                "/lang/german/modules/system/bx_checksum_scanner.php": "fbf1aacf1cd4cee0ac91de7c6658ecf8"
+            }
+        },
+        "shop-vendor-mmlc": {
+            "hashes": []
+        }
+    }
+}

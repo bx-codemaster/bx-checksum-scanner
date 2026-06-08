@@ -1,0 +1,31 @@
+{
+    "name": "BX Checksum Scanner",
+    "archiveName": "bx-codemaster/bx-checksum-scanner",
+    "category": "productivity",
+    "developer": "Axel Benkert",
+    "developerWebsite": "https://www.bx-coding.de",
+    "website": "https://www.bx-coding.de",
+    "srcDir": "src",
+    "version": "auto",
+    "shortDescription": "BX Checksum Scanner - Prüfsummen Scanner für Dateien",
+    "description": "Das Modul erlaubt das Scannen und Überprüfen von Prüfsummen für Dateien. Es bietet Funktionen zur Integration von verschiedenen Prüfsummen-Algorithmen und zur Verwaltung der Ergebnisse.",
+    "price": "free", 
+    "date": "2026-06-07 00:00:00",
+    "php": {
+      "version": "^7.4 || ^8.0"
+    },
+    "modifiedCompatibility": [
+      "3.0.1",
+      "3.0.2",
+      "3.1.0",
+      "3.1.1",
+      "3.1.2",
+      "3.1.3",
+      "3.1.4",
+      "3.1.5",
+      "3.1.6",
+      "3.2.0",
+      "3.2.1",
+      "3.3.0"
+    ]
+}
