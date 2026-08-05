@@ -4,7 +4,7 @@
         "shop-root": {
             "hashes": {
                 "/admin/bx_checksum_scanner.php": "0811b9da6b0df6d3b6917fc7c7a66daa",
-                "/admin/bx_checksum_scanner_ajax.php": "6c85db1230fedf61996f59003b8248ed",
+                "/admin/bx_checksum_scanner_ajax.php": "4e1edc45770412ec48fb6a415f278fde",
                 "/admin/images/icons/bx_checksum_scanner/icon_css.png": "924979d5f7f52a4510c3fe461f2a043a",
                 "/admin/images/icons/bx_checksum_scanner/icon_delete.png": "9b16c7f91e9cc0adf1273fde7bcfc525",
                 "/admin/images/icons/bx_checksum_scanner/icon_edit.png": "c1174a9d59038a943944c2f2fe20bc6d",
@@ -16,7 +16,7 @@
                 "/admin/images/icons/heading/bx_checksum_scanner.png": "9dbf1f24760971532d346f6534fc0498",
                 "/admin/includes/extra/css/bx_checksum_scanner.php": "8b457db8f2eaa2d66553a6c42d8372df",
                 "/admin/includes/extra/filenames/bx_checksum_scanner.php": "39fe1b34f65a3261016bc72967b9e406",
-                "/admin/includes/extra/javascript/bx_checksum_scanner.php": "0218d6c04d378721d14e9017efef75d2",
+                "/admin/includes/extra/javascript/bx_checksum_scanner.php": "badf5c9835d47f5517964f08fe58f41c",
                 "/admin/includes/extra/menu/bx_checksum_scanner.php": "ede34d4ecd2026d8e8f8e1de9bc4fbe1",
                 "/admin/includes/modules/system/bx_checksum_scanner.php": "7d1c1314e630dc5f0a68e480bff77abf",
                 "/lang/english/extra/admin/bx_checksum_scanner.php": "00a5548c0bc6dcdbdf1de46c6b3bb35e",
