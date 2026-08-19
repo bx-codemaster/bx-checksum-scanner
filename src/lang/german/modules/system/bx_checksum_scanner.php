@@ -17,7 +17,8 @@ $description = '
 <details class="bxac-card">
   <summary class="bxac-summary" style="list-style: none;">
   <span class="bxac-arrow">▸</span>
-  <span class="bxac-title">' . xtc_image(DIR_WS_ICONS.'heading/bx_checksum_scanner.png', 'BX Prüfsummen Scanner', '', '', 'style="max-height: 32px; vertical-align: middle; margin-right: 8px;"') . 'BX Prüfsummen Scanner</span>
+  ' . xtc_image(DIR_WS_ICONS.'heading/bx_checksum_scanner.png', 'BX Prüfsummen Scanner', '', '', 'style="max-height: 32px; margin: 2px;"') . '
+  <span class="bxac-title">BX Prüfsummen Scanner</span>
   </summary>
   <div class="bxac-body">
     <h3 style="margin-top: 0;">Dateiwächter</h3>

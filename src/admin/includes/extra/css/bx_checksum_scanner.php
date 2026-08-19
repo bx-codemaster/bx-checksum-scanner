@@ -24,24 +24,6 @@
 <style>
   /* BX Checksum Scanner Admin Styles */
 
-  #headboard {
-    display: flex; 
-    flex-direction: row; 
-    justify-content: flex-start;
-    width: 100%;
-    align-items: center; 
-    background: #AF417E; 
-    color: #ffffff; 
-    border-radius: 4px; 
-    margin-bottom: 10px; 
-    padding: 4px 0 2px 0;
-    line-height: 30px;
-  }
-
-  #headboard .main {
-    margin: 5px 10px;
-  }
-
   #bxCsProgress > div,
   .bxcs-button-panel {
     margin: 6px 0;
