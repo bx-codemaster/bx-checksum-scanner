@@ -60,7 +60,7 @@ require(DIR_WS_INCLUDES.'head.php');
         <tr>
           <td class="boxCenterLeft">
 
-          <div id="headboard">
+          <div class="bx-headboard">
             <?php
               if (defined('MODULE_BX_CHECKSUM_SCANNER_STATUS') && MODULE_BX_CHECKSUM_SCANNER_STATUS == 'True') {
             ?>
@@ -77,7 +77,7 @@ require(DIR_WS_INCLUDES.'head.php');
             <?php
               }
             ?>
-          </div> <!-- eof headboard //-->
+          </div> <!-- eof bx-headboard //-->
 
           <?php
             if (defined('MODULE_BX_CHECKSUM_SCANNER_STATUS') && MODULE_BX_CHECKSUM_SCANNER_STATUS == 'True') {

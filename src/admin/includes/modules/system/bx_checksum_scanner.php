@@ -34,7 +34,7 @@ class bx_checksum_scanner {
 
   public function __construct() {
      $this->code        = 'bx_checksum_scanner';
-     $this->version     = '3.0.0';
+     $this->version     = '3.2.0';
      $this->title       = MODULE_BX_CHECKSUM_SCANNER_TITLE;
      $this->description = MODULE_BX_CHECKSUM_SCANNER_DESC;
      $this->sort_order  = defined('MODULE_BX_CHECKSUM_SCANNER_SORT_ORDER') ? MODULE_BX_CHECKSUM_SCANNER_SORT_ORDER : 0;
